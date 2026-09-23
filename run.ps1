@@ -1,20 +1,12 @@
-# Вершина (Vertex) — запуск под Windows (PowerShell):  ./run.ps1
 $ErrorActionPreference = "Stop"
-Set-Location -Path $PSScriptRoot
-
-if (-not (Test-Path "venv")) {
-    Write-Host "[1/4] создаю venv..."
-    python -m venv venv
+Set-Location $PSScriptRoot
+if (-not (Test-Path -LiteralPath ".venv/Scripts/python.exe")) {
+    if (Get-Command python -ErrorAction SilentlyContinue) { python -m venv .venv }
+    elseif (Get-Command py -ErrorAction SilentlyContinue) { py -3 -m venv .venv }
+    else { throw "Install Python 3.12+ and add it to PATH." }
+    if ($LASTEXITCODE -ne 0) { throw "Failed to create virtual environment" }
 }
-Write-Host "[2/4] ставлю зависимости..."
-venv\Scripts\python.exe -m pip install -q --upgrade pip
-venv\Scripts\python.exe -m pip install -q -r requirements.txt
-
-Write-Host "[3/4] считаю роли/кластеры/приоритеты -> out\*.csv ..."
-venv\Scripts\python.exe backend\solution.py --data data --out out
-
-Write-Host "[4/4] собираю дашборд out\vertex.html ..."
-venv\Scripts\python.exe backend\build_viz.py --out out --vendor viz\vendor
-
-Write-Host ""
-Write-Host "Готово. Выгрузки в out\, дашборд: out\vertex.html"
+& ./.venv/Scripts/python.exe -m pip install -r requirements.txt
+if ($LASTEXITCODE -ne 0) { throw "Failed to install dependencies" }
+& ./.venv/Scripts/python.exe -X utf8 run.py @args
+if ($LASTEXITCODE -ne 0) { throw "Pipeline failed" }

@@ -1,0 +1,12 @@
+const {test}=require("node:test");
+const assert=require("node:assert/strict");
+const {validate,merge}=require("../viz/case-state.js");
+const state={status:"review",note:"Требует проверки",resolution:null,updated_at:"2026-09-23T10:00:00Z"};
+const bundle={version:1,analysis_id:"snapshot",states:{"CASE-a":state}};
+test("valid notes roundtrip",()=>assert.deepEqual(validate(bundle,"snapshot",["CASE-a"]),bundle.states));
+test("different snapshot rejected",()=>assert.throws(()=>validate(bundle,"other",["CASE-a"])));
+test("unknown case rejected",()=>assert.throws(()=>validate(bundle,"snapshot",[])));
+test("closed case needs resolution",()=>assert.throws(()=>validate({...bundle,states:{"CASE-a":{...state,status:"closed"}}},"snapshot",["CASE-a"])));
+test("oversized note rejected",()=>assert.throws(()=>validate({...bundle,states:{"CASE-a":{...state,note:"x".repeat(5001)}}},"snapshot",["CASE-a"])));
+test("conflict preserves local note by default",()=>{const m=merge(bundle.states,{"CASE-a":{...state,note:"incoming"}});assert.equal(m.conflicts,1);assert.equal(m.states["CASE-a"].note,state.note);});
+test("explicit replace resolves conflict",()=>assert.equal(merge(bundle.states,{"CASE-a":{...state,note:"incoming"}},true).states["CASE-a"].note,"incoming"));
