@@ -1,5 +1,7 @@
-pandas>=2.0
-numpy>=1.24
-networkx>=3.0
-pyarrow>=12.0
-scipy>=1.10
+# Точные версии для воспроизводимости (проверено на Python 3.9–3.12).
+# networkx запинен намеренно: разные версии дают разные PageRank/HITS.
+pandas==2.3.3
+numpy==2.0.2
+networkx==3.2.1
+scipy==1.13.1
+pyarrow==21.0.0
