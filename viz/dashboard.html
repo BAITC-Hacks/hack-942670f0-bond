@@ -2,7 +2,27 @@
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Вершина · Аналитика связей</title>
 <style>
-:root{color-scheme:dark;--bg:#0b121b;--panel:#111d2a;--raised:#192838;--line:#283849;--text:#ecf2f7;--muted:#97aabd;--accent:#6fe3c4}
+:root{color-scheme:dark;--bg:#0b121b;--panel:#111d2a;--raised:#192838;--line:#283849;--text:#ecf2f7;--muted:#97aabd;--accent:#6fe3c4;--g-sel:#ffffff;--g-dim:#344452;--g-seedring:#c9e4e0;--g-label:#e7f6f1;--g-link:rgba(113,145,170,.18);--g-linksel:#89dac7}
+html[data-theme="light"]{color-scheme:light;--bg:#f4f7fb;--panel:#ffffff;--raised:#eef2f7;--line:#dfe6ee;--text:#0f172a;--muted:#5b6b7d;--accent:#0d9488;--g-sel:#0f172a;--g-dim:#cbd5e1;--g-seedring:#334155;--g-label:#0f172a;--g-link:rgba(71,85,105,.30);--g-linksel:#0d9488}
+html[data-theme="light"] header,html[data-theme="light"] #workspace-tabs{background:#ffffff}
+html[data-theme="light"] #workspace-tabs button.active{background:#e6faf5;border-color:#9fe0d2}
+html[data-theme="light"] .pill{background:#e6faf5;border-color:#9fe0d2;color:#0d7a6e}
+html[data-theme="light"] input[type=text],html[data-theme="light"] select{background:#f8fafc;border-color:#cfd8e3}
+html[data-theme="light"] .hypothesis{background:#f1f5f9}
+html[data-theme="light"] tbody tr:hover,html[data-theme="light"] tbody tr.active{background:#eef4fb}
+html[data-theme="light"] td{border-top-color:#eef2f7}
+html[data-theme="light"] #canvas-pane{background:radial-gradient(ellipse at 45% 45%,#ffffff 0%,#eef3f8 75%)}
+html[data-theme="light"] #detail{background:#ffffff;box-shadow:-20px 0 50px #94a3b81f}
+html[data-theme="light"] .evidence{background:#f1f5f9}
+html[data-theme="light"] .warning{color:#8a5a00;background:#fdf1d6;border-color:#f0d38a}
+html[data-theme="light"] #chat-toggle{background:#e6faf5;border-color:#9fe0d2;color:#0d7a6e;box-shadow:0 8px 30px #94a3b833}
+html[data-theme="light"] #chat{background:#ffffff;border-color:#cfe6df;box-shadow:0 16px 45px #94a3b833}
+html[data-theme="light"] .chat-message{background:#f1f5f9}
+html[data-theme="light"] .chat-message.user{background:#e6faf5}
+html[data-theme="light"] #toast{background:#eef4fb;border-color:#cfd8e3;color:#0f172a}
+html[data-theme="light"] #resilience div{background:#f1f5f9}
+html[data-theme="light"] .badge{background:#eef2f7;color:#5b6b7d}
+html[data-theme="light"] .res-bar div{background:linear-gradient(#0d9488,#5eead4)}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px "Segoe UI",Arial,sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:wait}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 header{height:78px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;border-bottom:1px solid var(--line);background:#101b27}
@@ -45,7 +65,7 @@ details{margin:14px 0}summary{cursor:pointer;font-size:12px}#chat-toggle{positio
 @media(max-width:650px){header{height:70px}.header-right .metric{display:none}main{height:auto;display:flex;flex-direction:column}aside{height:45vh;border-right:0}#canvas-pane{height:65vh}.graph-top{left:12px;right:12px}.graph-top h2{font-size:13px}.graph-top .muted{max-width:190px}.graph-foot{left:12px;bottom:12px}.toolbar button{padding:6px}#chat-toggle{bottom:15px;right:12px}}
 </style></head><body>
 <header><div class="brand"><span class="mark">◬</span><div><strong>ВЕРШИНА</strong><div class="eyebrow">Финансовые связи · Исследование сети</div></div></div>
-<div class="header-right"><div class="metric"><b id="m-nodes">—</b><span>участников</span></div><div class="metric"><b id="m-edges">—</b><span>направленных связей</span></div><div class="metric"><b id="m-clusters">—</b><span>сообществ</span></div><span class="pill">● Локальная аналитика</span></div></header>
+<div class="header-right"><div class="metric"><b id="m-nodes">—</b><span>участников</span></div><div class="metric"><b id="m-edges">—</b><span>направленных связей</span></div><div class="metric"><b id="m-clusters">—</b><span>сообществ</span></div><button id="theme-btn" class="ghost" aria-label="Сменить тему" style="margin-right:4px">☾ Тёмная</button><span class="pill">● Локальная аналитика</span></div></header>
 <nav id="workspace-tabs" aria-label="Разделы"><button class="active" data-view="graph">Граф</button><button data-view="cases">Кейсы <span id="case-count"></span></button><button data-view="resilience">Устойчивость</button><button data-view="assistant">Ассистент</button></nav>
 <main id="view-graph"><aside>
 <h1>От общего к частному</h1><p class="muted intro">Выберите участника, изучите окружение и проверьте гипотезу по наблюдаемым данным.</p>

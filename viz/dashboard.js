@@ -2,6 +2,9 @@
 const $ = id => document.getElementById(id);
 const LABELS = {coordinator:"Координирующий",consolidator:"Сборщик",distributor:"Распределитель",transit:"Транзит",terminal:"Терминал*",peripheral:"Периферия"};
 const COLORS = {coordinator:"#f46c7c",consolidator:"#c69af5",distributor:"#68dac0",transit:"#f5ad64",terminal:"#699feb",peripheral:"#5c7085"};
+try{document.documentElement.dataset.theme=localStorage.getItem("vertex_theme")||"light";}catch(e){document.documentElement.dataset.theme="light";}
+const gv=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const GT={};function readGT(){GT.sel=gv("--g-sel")||"#ffffff";GT.dim=gv("--g-dim")||"#344452";GT.seed=gv("--g-seedring")||"#c9e4e0";GT.label=gv("--g-label")||"#e7f6f1";GT.link=gv("--g-link")||"rgba(113,145,170,.18)";GT.linksel=gv("--g-linksel")||"#89dac7";}readGT();
 const fmt = value => Number(value).toLocaleString("ru-RU",{maximumFractionDigits:0});
 const esc = value => String(value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const nodes = GRAPH.nodes, links = GRAPH.links, byId = new Map(nodes.map(n=>[n.id,n]));
@@ -62,20 +65,20 @@ nodes.forEach((n,i)=>{
 const pane=$("canvas-pane"),canvas=$("graph");
 const Graph=ForceGraph()(canvas).width(pane.clientWidth).height(pane.clientHeight)
  .backgroundColor("rgba(0,0,0,0)").nodeId("id").nodeVal("_val").nodeRelSize(2.7)
- .nodeColor(n=>state.selected===n.id?"#ffffff":state.selected&&!highlighted.has(n.id)?"#344452":COLORS[n.role])
+ .nodeColor(n=>state.selected===n.id?GT.sel:state.selected&&!highlighted.has(n.id)?GT.dim:COLORS[n.role])
  .nodeLabel(n=>esc(n.id)+" · "+LABELS[n.role]+" · "+n.priority.toFixed(3))
  .linkColor(l=>state.cycles&&cycleEdges.has(edgeKey(endpoint(l.source),endpoint(l.target)))?"#ff617d":
-   state.selected&&(endpoint(l.source)===state.selected||endpoint(l.target)===state.selected)?"#89dac7":"rgba(113,145,170,.18)")
+   state.selected&&(endpoint(l.source)===state.selected||endpoint(l.target)===state.selected)?GT.linksel:GT.link)
  .linkWidth(l=>Math.max(.35,Math.log10(l.sum_kzt+1)/5)*(state.cycles&&cycleEdges.has(edgeKey(endpoint(l.source),endpoint(l.target)))?2.5:1))
  .linkDirectionalArrowLength(l=>state.cycles&&cycleEdges.has(edgeKey(endpoint(l.source),endpoint(l.target)))?5:3)
  .linkDirectionalArrowRelPos(.96)
  .nodeCanvasObjectMode(()=>"after").nodeCanvasObject((n,ctx,scale)=>{
    const radius=Math.sqrt(n._val)*2.7;
    if(n.is_seed||n.truncated){ctx.save();ctx.beginPath();ctx.arc(n.x,n.y,radius+2,0,Math.PI*2);
-     ctx.strokeStyle=n.truncated?"#f3c675":"#c9e4e0";ctx.lineWidth=1;
+     ctx.strokeStyle=n.truncated?"#f3c675":GT.seed;ctx.lineWidth=1;
      if(n.truncated)ctx.setLineDash([2.5,2.5]);ctx.stroke();ctx.restore();}
-   if(n.id===state.selected){ctx.beginPath();ctx.arc(n.x,n.y,radius+5,0,Math.PI*2);ctx.strokeStyle="#ffffff";ctx.lineWidth=1.2;ctx.stroke();}
-   if(n.id===state.selected||(n.rank&&n.rank<=8&&scale>1.2)){ctx.font=(10/scale)+"px Consolas";ctx.fillStyle="#e7f6f1";ctx.textAlign="center";ctx.fillText("…"+n.id.slice(-7),n.x,n.y-radius-5);}
+   if(n.id===state.selected){ctx.beginPath();ctx.arc(n.x,n.y,radius+5,0,Math.PI*2);ctx.strokeStyle=GT.sel;ctx.lineWidth=1.2;ctx.stroke();}
+   if(n.id===state.selected||(n.rank&&n.rank<=8&&scale>1.2)){ctx.font=(10/scale)+"px Consolas";ctx.fillStyle=GT.label;ctx.textAlign="center";ctx.fillText("…"+n.id.slice(-7),n.x,n.y-radius-5);}
  }).onNodeClick(n=>{state.selected=n.id;highlighted=neighborSet(n.id);renderCard(n);apply();})
  .onBackgroundClick(()=>{clearSelection();apply();}).cooldownTicks(100).d3VelocityDecay(.35);
 function endpoint(x){return typeof x==="object"?x.id:x;}
@@ -142,6 +145,8 @@ $("zoom-out").onclick=()=>Graph.zoom(Graph.zoom()/1.4,250);
 $("fit").onclick=()=>Graph.zoomToFit(400,70);
 new ResizeObserver(()=>{Graph.width(pane.clientWidth).height(pane.clientHeight);}).observe(pane);
 apply();setTimeout(()=>Graph.zoomToFit(600,75),1000);
+const themeBtn=$("theme-btn");function themeLabel(){if(themeBtn)themeBtn.textContent=document.documentElement.dataset.theme==="light"?"☾ Тёмная":"☀ Светлая";}themeLabel();
+if(themeBtn)themeBtn.onclick=()=>{const t=document.documentElement.dataset.theme==="light"?"dark":"light";document.documentElement.dataset.theme=t;try{localStorage.setItem("vertex_theme",t)}catch(e){}readGT();themeLabel();Graph.nodeColor(Graph.nodeColor()).linkColor(Graph.linkColor());};
 
 // Offline queries are explicit deterministic filters; OpenAI interprets a query on the server.
 function localQuery(question){
